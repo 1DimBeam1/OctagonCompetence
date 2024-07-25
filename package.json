@@ -1,6 +1,7 @@
 {
   "name": "first_server",
   "version": "1.0.0",
+  "author": "Machkasov Dmitriy",
   "scripts": {
     "start": "nodemon index.js"
   },
