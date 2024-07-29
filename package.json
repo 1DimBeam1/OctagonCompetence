@@ -1,11 +1,13 @@
 {
   "name": "first_server",
   "version": "1.0.0",
+  "author": "Machkasov Dmitry",
   "scripts": {
     "start": "nodemon index.js"
   },
   "dependencies": {
     "express": "^4.19.2",
+    "mysql2": "^3.11.0",
     "nodemon": "^3.1.4"
   }
 }
