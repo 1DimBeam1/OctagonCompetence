@@ -1,163 +1,29 @@
 const express = require("express");
 const app = express();
-const mysql = require("mysql2");
+const TelegramBot = require('node-telegram-bot-api');
 
-const connection = mysql.createConnection(
-{
-    host: "localhost",
-    user: "root",
-    database: "chatbottests",
-    password: ""
-});
+const token = '7498108843:AAH-GEkKdWy9ss0mp8vIogGifB97TAD3VjQ';
 
-connection.connect(function(err)
+const bot = new TelegramBot(token, {polling: true});
+
+const greetMessageUser = {};
+
+
+bot.onText(/\/*/, (msg) => 
 {
-    if (err)
+    const chatId = msg.chat.id;
+    if (!greetMessageUser[chatId])
     {
-        return console.error("Ошибка: " + err.message)
-    }
-    else
-    {
-        console.log("Подключение к серверу MySQL успешно выполнено")
+        const message = "Привет, октагон!";
+        bot.sendMessage(chatId, message);
+        greetMessageUser[chatId] = true;
     }
 });
 
-app.get('/getAllItems', (request, response) =>
+
+bot.on('polling_error', (error) => 
 {
-	connection.query('SELECT * FROM items', function(err, results, fields) 
-    {
-		if (err) 
-        {
-			response.json(err);
-		}
-		else if (results.length === 0) 
-        {
-			response.send([{}]);
-		}
-		else 
-        {
-			response.send(results);
-		}
-	});
+    console.error('polling_error', error);
 });
-
-app.use('/addItem', (request, response) => 
-{
-	const { name, descr } = request.query;
-
-	if (!name || !descr) 
-    {
-		response.status(500).send(null);
-		return;
-	}
-	
-	const query = 'INSERT INTO items (name, descr) VALUES (?, ?)';
-	connection.query(query, [name, descr], (error, results, fields) => 
-    {
-	    if (error) 
-        {
-            response.status(500).send(error);
-            return;
-        }
-        response.send("Item " + name + " add in table")
-    });
-});
-
-app.use('/deleteItem', (request, response) => 
-{
-    const num = request.query.id;
-    const id = Number(num);
-
-    if (isNaN(id)) {
-        response.status(400).send(null);
-        return;
-    }
-
-    const deleteQuery = 'DELETE FROM items WHERE id = ?';
-    connection.query(deleteQuery, [id], (error, results, fields) => 
-    {
-        if (error) 
-        {
-        response.status(500).send(error);
-            return;
-        } 
-        else 
-        {
-            response.status(200).send([{}]);
-            return;
-        }
-    });
-
-});
-
-app.use('/deleteItem', (request, response) => 
-{
-    const num = request.query.id;
-    if (!num) {
-        response.status(400).send(null);
-        return;
-    }
-
-    const id = Number(num);
-    if (isNaN(id)) {
-        response.status(400).send(null);
-        return;
-    }
-
-    const deleteQuery = 'DELETE FROM items WHERE id = ?';
-    connection.query(deleteQuery, [id], (error, results, fields) => 
-    {
-        if (error) 
-        {
-            response.status(500).send(error);
-            return;
-        } 
-        else 
-        {
-            response.status(200).send([{}]);
-            return;
-        }
-    });
-
-});
-
-app.use('/updateItem', (request, response) => 
-{
-    const { id, name, descr } = request.query;
-
-    if (!id || !name || !descr) 
-    {
-        response.status(400).send(null);
-        return;
-    }
-
-    const numId = Number(id);
-
-    if (isNaN(id)) {
-        response.status(400).send(null);
-        return;
-    }
-
-    const updateQuery = 'UPDATE items SET name = ?, descr = ? WHERE id = ?';
-    connection.query(updateQuery, [name, descr, numId], (error, results, fields) => 
-    {
-        if (error) 
-        {
-            response.status(500).send(error);
-            return;
-        }
-        if (results.affectedRows === 0) 
-        {
-            response.send([{}]);
-        } 
-        else
-        {
-            response.send("update")
-        }
-
-  });
-    
-});
-
 
 app.listen(3000);
